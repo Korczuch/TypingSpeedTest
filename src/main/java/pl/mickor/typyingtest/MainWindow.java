@@ -6,7 +6,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -19,6 +18,7 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.constant.Constable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +38,7 @@ public class MainWindow extends Application {
     private Label timeLeftLabel;
     private int remainingTime;
     public static List<String> stringOfWords = new ArrayList<>();
+    private String selectedLanguage;
 
 
     @Override
@@ -67,7 +68,7 @@ public class MainWindow extends Application {
         words = new Words(textFlow);
         startButton.setOnAction(actionEvent -> {
             if (languageSelection.getValue() != null && timeSelection.getValue() != null) {
-                String selectedLanguage = languageSelection.getValue();
+                this.selectedLanguage = languageSelection.getValue();
                 int selectedTime = Integer.parseInt(timeSelection.getValue());
 
                 try {
@@ -195,6 +196,9 @@ public class MainWindow extends Application {
                             }
                         }));
         timeline.play();
+    }
+    public String getLanguage(){
+        return selectedLanguage;
     }
 
 

@@ -10,6 +10,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +18,13 @@ import java.util.List;
 public class Words {
     private TextFlow originalTextFlow;
     private TextFlow enteredTextFlow;
+    TestGenerator generator = new TestGenerator();
 
     private List<ClassifiedChar> originalChars;
     private List<ClassifiedChar> enteredChars;
     public ArrayList<Character> currentlyEnteredWord = new ArrayList<>();
     public ArrayList<String> sourceWords = new ArrayList<>();
+    public List<String> newSourceWords = new ArrayList<>();
     public String sourceWord = new String();
     public ArrayList<Character> enteredWord = new ArrayList<>();
     public ArrayList<ClassifiedChar> classifiedCharacters = new ArrayList<>();
@@ -35,6 +38,8 @@ public class Words {
     public ArrayList<Double> timePerWord = new ArrayList<>();
     public boolean wordCompleted = false;
     private boolean animationStarted = false;
+    private Duration wordStartTime;
+    private boolean wordInProgress;
 
     public Words(TextFlow originalTextFlow) {
         this.originalTextFlow = originalTextFlow;
@@ -56,21 +61,6 @@ public class Words {
     public ClassifiedChar addChar(char c) {
         ClassifiedChar classifiedChar;
         sourceWord = sourceWords.get(indexTextFlow);
-        System.out.println("Source word size " + sourceWord.length());
-        System.out.println("CurrentlyEnteredWord size " + currentlyEnteredWord.size());
-        System.out.println("Entered word size: " + enteredWord.size());
-
-        //We need to make it so that once the word is finished (ergo all characters or char length of source word is
-        //reached, we need to then switch to the else statemetnt when adding words. The thing to remember is that it HAS
-        //to be AFTER the word is finished that it goes to else, otherwise we can't finish the word
-
-        //Once that is done, we also need to make sure not to clear the current array once we press space, but add
-        //" " to the arrays (to take care of the space between the words that is a node, and have a new array,
-        //be cleared, and that arrays be for the current word we are typying
-        //that was the extra chars work right
-
-        //why tf are classified characters classified, but instead of showing that we're classiying the next ones
-        //we update the classification of the same fucking ones?
 
         if (wordCompleted == false) {
             classifiedChar = classifiedCharacters.get(enteredWord.size());
@@ -90,8 +80,10 @@ public class Words {
                     correctChars++;
                 }
             } else if (c == sourceWord.charAt(currentlyEnteredWord.size() + 1)) {
-                classifiedChar.classification = CharClassification.SKIPPED_CHAR;
-                skippedChars++;
+                if (classifiedChar.classification != CharClassification.INCORRECT) {
+                    classifiedChar.classification = CharClassification.SKIPPED_CHAR;
+                    skippedChars++;
+                }
 
                 // Move to evaluating the character we got correct
                 currentlyEnteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
@@ -105,14 +97,18 @@ public class Words {
                 classifiedChar.classification = CharClassification.INCORRECT;
                 incorrectChars++;
             }
-
         } else {
             classifiedChar = new ClassifiedChar(c, CharClassification.EXTRA_CHAR);
             classifiedCharacters.add(enteredWord.size() + 1, classifiedChar);
             extraChars++;
             System.out.println(c);
-
         }
+
+        if (!wordInProgress){
+            wordStartTime = Duration.ZERO;
+            wordInProgress = true;
+        }
+
         updateEnteredText();
         checkWordCompleted();
         return classifiedChar;
@@ -190,7 +186,7 @@ public class Words {
                 withinCurrentWord = false;
             }
         }
-
+        wordInProgress = false;
         moveToNextWord();
     }
 
@@ -237,6 +233,10 @@ public class Words {
             Text text = colourCharacters(classifiedChar);
             text.setStyle("-fx-font-size: 25px;");
             enteredTextFlow.getChildren().add(text);
+        }
+        if (wordCompleted && wordInProgress){
+            timePerWord.add(wordStartTime.toSeconds());
+            wordInProgress = false;
         }
         waveAnimation(enteredTextFlow);
     }
@@ -292,7 +292,23 @@ public class Words {
             wordCompleted = false;
         } else {
             wordCompleted = true;
+            wordStartTime = Duration.ZERO;
         }
     }
+    //generate a new string of 30 words, and set them as the textFlow (same thing that's done at the start...)
+    //We need to generate a new string, and pass it through the methods to generate textFlow
+    //We need to get language from MainWindow
+    public void newParagraph() throws IOException {
+        if(indexTextFlow >= 29 && wordCompleted){
+            indexTextFlow = 0;
+            MainWindow mainWindow = new MainWindow();
+
+            newSourceWords = generator.generateTest(mainWindow.getLanguage());
+
+
+        }
+    }
+
+
 
 }
