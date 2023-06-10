@@ -172,14 +172,35 @@ public class Words {
 
         return words;
     }
+//I think we should also add the skipped word (i) to entered word?... Think so chief.
+    //the logic for skipWord ain't right
+    //it needs to check if next char in source word is a space, if it is, then we aren't within current word,
+    //if it ain't a space, then we are not within current word and need to classify the characters as skipped, and
+    //add them to the classifiedCharacters arraylist, all the way to the space, once we get to the space,
+    //we call move to next word
+    //skipping characters in a word needs to also add them to enteredWord
+
+    //there is now a little fucky wucky where the word is the right length after the first word but later missing a space
+    //need to llok at that, potentially if original logic is right, this will not be an issue
+
+
 
     public void skipWord() {
-        boolean withinCurrentWord = true;
+        boolean withinCurrentWord;
+
+        if(currentlyEnteredWord.size() < sourceWord.length()){
+            withinCurrentWord = true;
+        }else{
+            withinCurrentWord = false;
+        }
 
         for (ClassifiedChar classifiedChar : classifiedCharacters) {
             if (withinCurrentWord && classifiedChar.classification == CharClassification.MISSING_CHAR) {
                 classifiedChar.classification = CharClassification.SKIPPED_CHAR;
                 skippedChars++;
+                //need to add the skipped characters here to entered word...
+                enteredWord.add('a');
+
             }
 
             if (classifiedChar.character == ' ') {
@@ -192,14 +213,17 @@ public class Words {
 
     private void moveToNextWord() {
         currentlyEnteredWord.clear();
+        //enteredWord.add(' ');
         enteredWord.add(' ');
-        enteredWord.add(' ');
-        if (originalChars.size() > classifiedCharacters.size()) {
+        //if (originalChars.size() > classifiedCharacters.size()) {
             int nextWordStartIndex = classifiedCharacters.size();
             for (int i = nextWordStartIndex; i < originalChars.size(); i++) {
                 ClassifiedChar classifiedChar = originalChars.get(i);
                 classifiedCharacters.add(classifiedChar);
-            }
+                //this shit ain't working, and the character aren't getting added
+                //probbably because classifiedChar isn't a ring? fuck me if I know?
+                enteredWord.add(classifiedChar.getCharacter());
+           // }
         }
         indexTextFlow++;
     }
@@ -234,11 +258,12 @@ public class Words {
             text.setStyle("-fx-font-size: 25px;");
             enteredTextFlow.getChildren().add(text);
         }
-        if (wordCompleted && wordInProgress){
+        if (wordCompleted && wordInProgress) {
             timePerWord.add(wordStartTime.toSeconds());
             wordInProgress = false;
         }
-        waveAnimation(enteredTextFlow);
+            waveAnimation(enteredTextFlow);
+
     }
 
     public void displayEnteredText() {
@@ -254,11 +279,25 @@ public class Words {
         return originalTextFlow;
     }
 
-    public void removeChar(char o) {
+    public void removeChar() {
         if (!classifiedCharacters.isEmpty()) {
+            int lastEnteredIndex = currentlyEnteredWord.size() - 1;
+            int lastEnteredCharIndex = enteredWord.size() - 1;
+            char lastEnteredChar = enteredWord.get(lastEnteredCharIndex);
+
+            // Find the last character with a classification and mark it as missing
+            for (int i = lastEnteredIndex; i >= 0; i--) {
+                ClassifiedChar classifiedChar = classifiedCharacters.get(i);
+                if (classifiedChar.classification != CharClassification.MISSING_CHAR) {
+                    classifiedChar.classification = CharClassification.MISSING_CHAR;
+                    break;
+                }
+            }
+
             classifiedCharacters.remove(classifiedCharacters.size() - 1);
+            currentlyEnteredWord.remove(lastEnteredIndex);
+            enteredWord.remove(lastEnteredCharIndex);
         }
-        currentlyEnteredWord.remove(o);
     }
 
     //if no more characters return false
@@ -308,7 +347,25 @@ public class Words {
 
         }
     }
+/*
+WPM calculations...
+Average WPM calculation is easy. We take the amount of words we typed and the time it took. Since our times are
+set by us, we either multiply by x or divide by x to get words per minute.
+
+For current WPM (calculte for each word), we have the times it took to complete a word stored. We take that time (y).
+60/y, which gives us the the WPM speed for that word, and we store it in a list. Having both the time it took to
+complete the word and the WPM, we can display it, where the x axis (seconds), it added to each previous time, so that
+we can display it, and set the corresponding y for it.
+
+The thing we're missing is time between words.... hmmm
+
+Add another list that stores the time elapsed from start to write that word??
+ */
 
 
+
+public void clearOriginalTextFlow(){
+    originalTextFlow.getChildren().clear();
+}
 
 }

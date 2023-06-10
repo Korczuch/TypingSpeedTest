@@ -10,8 +10,13 @@ import java.util.Random;
 public class TestGenerator {
 
 
+
+
     public List<String> generateTest(String language) throws IOException {
-        List<String> randomWords;
+        List<String> randomWords = new ArrayList<>();
+        if(!randomWords.isEmpty()){
+            randomWords.clear();
+        }
         randomWords = getRandomWords(("dictionary/" + language + ".txt"), 30);
         return randomWords;
    }
@@ -23,6 +28,9 @@ public class TestGenerator {
     private List<String> getRandomWords(String filePath, int wordCount) throws IOException {
         List<String> words = Files.readAllLines(Path.of(filePath));
         List<String> randomWords = new ArrayList<>();
+        if(!randomWords.isEmpty()){
+            randomWords.clear();
+        }
         Random random = new Random();
 
         for(int i = 0; i < wordCount; i++){

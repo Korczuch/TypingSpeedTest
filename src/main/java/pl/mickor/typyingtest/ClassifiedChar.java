@@ -8,6 +8,10 @@ public class ClassifiedChar {
         this.character = character;
         this.classification = classification;
     }
+
+    public char getCharacter() {
+        return character;
+    }
 }
 
 enum CharClassification {
