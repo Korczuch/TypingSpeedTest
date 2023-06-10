@@ -92,7 +92,7 @@ public class Words {
                     skippedChars++;
                 }
                 // Move to evaluating the character we got correct
-                currentlyEnteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
+                currentlyEnteredWord.add('$');
                 //currentlyEnteredWord.add(c);
                 enteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
                 //enteredWord.add(c);
@@ -196,48 +196,44 @@ public class Words {
 
         return words;
     }
-//I think we should also add the skipped word (i) to entered word?... Think so chief.
-    //the logic for skipWord ain't right
-    //it needs to check if next char in source word is a space, if it is, then we aren't within current word,
-    //if it ain't a space, then we are not within current word and need to classify the characters as skipped, and
-    //add them to the classifiedCharacters arraylist, all the way to the space, once we get to the space,
-    //we call move to next word
-    //skipping characters in a word needs to also add them to enteredWord
-
-    //there is now a little fucky wucky where the word is the right length after the first word but later missing a space
-    //need to llok at that, potentially if original logic is right, this will not be an issue
-
 
     public void skipWord() {
-        boolean withinCurrentWord;
-
-        if (currentlyEnteredWord.size() < sourceWord.length()) {
-            withinCurrentWord = true;
-        } else {
-            withinCurrentWord = false;
+        boolean skippingWord = false;
+        int size = enteredWord.size();
+        for(int i = 0; i < sourceWord.length() - currentlyEnteredWord.size(); i++){
+            classifiedCharacters.get(size + i).classification = CharClassification.SKIPPED_CHAR;
+            enteredWord.add('$');
+            skippingWord = true;
         }
 
-        for (ClassifiedChar classifiedChar : classifiedCharacters) {
-            if (wordCompleted && classifiedChar.classification == CharClassification.MISSING_CHAR) {
-                classifiedChar.classification = CharClassification.SKIPPED_CHAR;
-                skippedChars++;
-                //need to add the skipped characters here to entered word...
-                enteredWord.add('a');
+//
+//        for (ClassifiedChar classifiedChar : classifiedCharacters) {
+//            if (wordCompleted && classifiedChar.classification == CharClassification.MISSING_CHAR) {
+//                classifiedChar.classification = CharClassification.SKIPPED_CHAR;
+//                skippedChars++;
+//                //need to add the skipped characters here to entered word...
+//                enteredWord.add('a');
+//
+//            }
+//
+//            if (classifiedChar.character == ' ') {
+//                wordCompleted = false;
+//            }
+//        }
+//
 
-            }
-
-            if (classifiedChar.character == ' ') {
-                wordCompleted = false;
-            }
-        }
         wordInProgress = false;
+        if(skippingWord) {
+            enteredWord.add('$');
+
+        }
+        wordCompleted = false;
         moveToNextWord();
     }
 
     private void moveToNextWord() {
         currentlyEnteredWord.clear();
         enteredWord.add(' ');
-        //enteredWord.add(' ');
         //if (originalChars.size() > classifiedCharacters.size()) {
         int nextWordStartIndex = classifiedCharacters.size();
         //for (int i = nextWordStartIndex; i < originalChars.size(); i++) {
@@ -303,7 +299,7 @@ public class Words {
     }
 
     public void removeChar() {
-        if (!classifiedCharacters.isEmpty()) {
+        if (!enteredWord.isEmpty()) {
             int lastEnteredIndex = currentlyEnteredWord.size() - 1;
             int lastEnteredCharIndex = enteredWord.size() - 1;
             char lastEnteredChar = enteredWord.get(lastEnteredCharIndex);
