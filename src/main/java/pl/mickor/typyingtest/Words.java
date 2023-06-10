@@ -64,9 +64,9 @@ public class Words {
         sourceWord = sourceWords.get(indexTextFlow);
         System.out.println(wordCompleted);
         if (wordCompleted == false) {
-            if(indexTextFlow > 0){
-                classifiedChar = classifiedCharacters.get(enteredWord.size()-1);
-            }else{
+            if (indexTextFlow > 0) {
+                classifiedChar = classifiedCharacters.get(enteredWord.size());
+            } else {
                 classifiedChar = classifiedCharacters.get(enteredWord.size());
             }
 
@@ -77,13 +77,13 @@ public class Words {
 
                 // Check if there is a subsequent character in the word
                 //if (currentlyEnteredWord.size() + 1 < sourceWord.length()) {
-                    //char nextChar = sourceWord.charAt(currentlyEnteredWord.size() + 1);
+                //char nextChar = sourceWord.charAt(currentlyEnteredWord.size() + 1);
 
-                    // Move to evaluating the subsequent character
+                // Move to evaluating the subsequent character
 
-                    //classifiedChar = classifiedCharacters.get(enteredWord.size());
-                    //classifiedChar.classification = CharClassification.CORRECT;
-                    //correctChars++;
+                //classifiedChar = classifiedCharacters.get(enteredWord.size());
+                //classifiedChar.classification = CharClassification.CORRECT;
+                //correctChars++;
                 //}
             } else if (currentlyEnteredWord.size() + 1 < sourceWord.length() && c ==
                     sourceWord.charAt(currentlyEnteredWord.size() + 1)) {
@@ -96,9 +96,9 @@ public class Words {
                 //currentlyEnteredWord.add(c);
                 enteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
                 //enteredWord.add(c);
-                if(indexTextFlow > 0){
-                    classifiedChar = classifiedCharacters.get(enteredWord.size()-1);
-                }else{
+                if (indexTextFlow > 0) {
+                    classifiedChar = classifiedCharacters.get(enteredWord.size());
+                } else {
                     classifiedChar = classifiedCharacters.get(enteredWord.size());
                 }
                 classifiedChar.classification = CharClassification.CORRECT;
@@ -109,9 +109,9 @@ public class Words {
             }
         } else {
             classifiedChar = new ClassifiedChar(c, CharClassification.EXTRA_CHAR);
-            if(indexTextFlow > 0){
-                classifiedCharacters.add(enteredWord.size()-1, classifiedChar);
-            }else{
+            if (indexTextFlow > 0) {
+                classifiedCharacters.add(enteredWord.size(), classifiedChar);
+            } else {
                 classifiedCharacters.add(enteredWord.size(), classifiedChar);
             }
 
@@ -133,8 +133,8 @@ public class Words {
         System.out.println("skipped" + skippedChars);
         System.out.println("incorrect " + incorrectChars);
         System.out.println("correct " + correctChars);
-        System.out.println("currently entered word: " + currentlyEnteredWord.stream().map(x->x.toString()).collect(Collectors.joining()));
-        System.out.println("entered word: " + enteredWord.stream().map(x->x.toString()).collect(Collectors.joining()));
+        System.out.println("currently entered word: " + currentlyEnteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
+        System.out.println("entered word: " + enteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
         return classifiedChar;
     }
 
@@ -198,21 +198,21 @@ public class Words {
     }
 
     public void skipWord() {
-        boolean skippingWord = false;
+
         int size = enteredWord.size();
         for(int i = 0; i < sourceWord.length() - currentlyEnteredWord.size(); i++){
             classifiedCharacters.get(size + i).classification = CharClassification.SKIPPED_CHAR;
             enteredWord.add('$');
-            skippingWord = true;
+            skippedChars++;
         }
 
-//
+
 //        for (ClassifiedChar classifiedChar : classifiedCharacters) {
 //            if (wordCompleted && classifiedChar.classification == CharClassification.MISSING_CHAR) {
 //                classifiedChar.classification = CharClassification.SKIPPED_CHAR;
 //                skippedChars++;
 //                //need to add the skipped characters here to entered word...
-//                enteredWord.add('a');
+//                //enteredWord.add('a');
 //
 //            }
 //
@@ -220,13 +220,13 @@ public class Words {
 //                wordCompleted = false;
 //            }
 //        }
+
+
+//        wordInProgress = false;
+//        if(skippingWord) {
+//            enteredWord.add('$');
 //
-
-        wordInProgress = false;
-        if(skippingWord) {
-            enteredWord.add('$');
-
-        }
+//        }
         wordCompleted = false;
         moveToNextWord();
     }
@@ -237,13 +237,13 @@ public class Words {
         //if (originalChars.size() > classifiedCharacters.size()) {
         int nextWordStartIndex = classifiedCharacters.size();
         //for (int i = nextWordStartIndex; i < originalChars.size(); i++) {
-            //ClassifiedChar classifiedChar = originalChars.get(i);
-            //classifiedCharacters.add(classifiedChar);
-            //this shit ain't working, and the character aren't getting added
-            //probbably because classifiedChar isn't a ring? fuck me if I know?
-            //enteredWord.add(classifiedChar.getCharacter());
-            // }
-       // }
+        //ClassifiedChar classifiedChar = originalChars.get(i);
+        //classifiedCharacters.add(classifiedChar);
+        //this shit ain't working, and the character aren't getting added
+        //probbably because classifiedChar isn't a ring? fuck me if I know?
+        //enteredWord.add(classifiedChar.getCharacter());
+        // }
+        // }
         indexTextFlow++;
     }
 
