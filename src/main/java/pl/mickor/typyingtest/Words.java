@@ -91,7 +91,6 @@ public class Words {
                     classifiedChar.classification = CharClassification.SKIPPED_CHAR;
                     skippedChars++;
                 }
-
                 // Move to evaluating the character we got correct
                 currentlyEnteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
                 //currentlyEnteredWord.add(c);
