@@ -193,7 +193,7 @@ public class Words {
         wordStarted = false;
         endTime = Double.valueOf(System.currentTimeMillis());
         storeTimeForWord();
-
+        System.out.println(sourceWord);
         int size = enteredWord.size();
         for (int i = 0; i < sourceWord.length() - currentlyEnteredWord.size(); i++) {
             classifiedCharacters.get(size + i).classification = CharClassification.SKIPPED_CHAR;
@@ -209,6 +209,7 @@ public class Words {
         currentlyEnteredWord.clear();
         enteredWord.add(' ');
         indexTextFlow++;
+        sourceWord = sourceWords.get(indexTextFlow);
     }
 
     Text colourCharacters(ClassifiedChar c) {
@@ -327,8 +328,6 @@ public class Words {
             MainWindow mainWindow = new MainWindow();
 
             newSourceWords = generator.generateTest(mainWindow.getLanguage());
-
-
         }
     }
 
@@ -367,9 +366,6 @@ public class Words {
         String fileName = now.format(formatter);
 
         String folderPath = "Results";
-
-
-
 
         try {
             File folder = new File(folderPath);
