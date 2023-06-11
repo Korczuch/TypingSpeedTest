@@ -10,9 +10,18 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class Words {
@@ -346,24 +355,49 @@ public class Words {
         }
         averageWPM = sum / wordsPerMinute.size();
     }
-/*
-WPM calculations...
-Average WPM calculation is easy. We take the amount of words we typed and the time it took. Since our times are
-set by us, we either multiply by x or divide by x to get words per minute.
-
-For current WPM (calculte for each word), we have the times it took to complete a word stored. We take that time (y).
-60/y, which gives us the the WPM speed for that word, and we store it in a list. Having both the time it took to
-complete the word and the WPM, we can display it, where the x axis (seconds), it added to each previous time, so that
-we can display it, and set the corresponding y for it.
-
-The thing we're missing is time between words.... hmmm
-
-Add another list that stores the time elapsed from start to write that word??
- */
-
 
     public void clearOriginalTextFlow() {
         originalTextFlow.getChildren().clear();
+    }
+
+    //Generate a word file with the entered words
+    public void generateWordFile() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
+        String fileName = now.format(formatter);
+
+        String folderPath = "Results";
+
+
+
+
+        try {
+            File folder = new File(folderPath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            File file = new File(folder, fileName + ".txt");
+            FileWriter writer = new FileWriter(file);
+
+            for (int i = 0; i < wordsPerMinute.size(); i++) {
+                String word = sourceWords.get(i);
+                double wpm = wordsPerMinute.get(i);
+
+                DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+                symbols.setDecimalSeparator('.');
+                DecimalFormat decimalFormat = new DecimalFormat("#.##", symbols);
+                double roundedWPM = Double.parseDouble(decimalFormat.format(wpm));
+
+
+                String line = word + " --> " + roundedWPM + "wpm";
+                writer.write(line);
+                writer.write(System.lineSeparator());
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

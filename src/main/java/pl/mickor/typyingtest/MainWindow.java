@@ -79,7 +79,6 @@ public class MainWindow extends Application {
         Button testButton = new Button("End test");
 
         testButton.setOnAction(actionEvent -> {
-
             transitionToFinishScene();
         });
 
@@ -220,8 +219,8 @@ public class MainWindow extends Application {
     }
 
     private void handleEscapeShortcut() {
-        // Handle ESCAPE shortcut
         System.out.println("ESC pressed");
+        transitionToFinishScene();
     }
 
     private void updateTextFlow() {
@@ -316,6 +315,7 @@ public class MainWindow extends Application {
     private void transitionToFinishScene() {
         words.calculateWPM();
         words.calculateAverageWPM();
+        words.generateWordFile();
 
         Stage stage = new Stage();
         BorderPane newRoot = new BorderPane();
@@ -397,28 +397,6 @@ public class MainWindow extends Application {
         newRoot.setCenter(lineChart);
 
         stage.show();
-    }
-
-    public void generateGraph(){
-        NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Seconds");
-
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("WPM");
-
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("WPM per second");
-
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName("WPM");
-
-        ObservableList<XYChart.Data<Number, Number>> dataPoints = series.getData();
-        for (int i = 0; i < words.wordsPerMinute.size(); i++) {
-            double seconds = calculateTotalSeconds(i);
-            double wpm = words.wordsPerMinute.get(i);
-            dataPoints.add(new XYChart.Data<>(seconds, wpm));
-        }
-        lineChart.getData().add(series);
     }
 
     private double calculateTotalSeconds(int index) {
