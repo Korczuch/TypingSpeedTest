@@ -49,6 +49,7 @@ public class MainWindow extends Application {
     private boolean isStarted = false;
     private boolean isPaused = false;
     private Timeline timeline = new Timeline();
+    private Button startButton = new Button("Generate test");
 
 
     @Override
@@ -72,7 +73,7 @@ public class MainWindow extends Application {
         timeSelection.getItems().addAll("15", "20", "45", "60", "90", "120", "300");
         timeSelection.setPromptText("Select time for test");
 
-        Button startButton = new Button("Generate test");
+        //Button startButton = new Button("Generate test");
         //textFlow = new TextFlow();
 
         //this part is gonna get deleted later
@@ -91,14 +92,22 @@ public class MainWindow extends Application {
                 try {
                     //Why the fuck when I press again this bitch adds not clears the hoe ffs
                     textFlow.getChildren().clear();
+                    if(!words.classifiedCharacters.isEmpty()){
+                        words.classifiedCharacters.clear();
+                    }
                     if (!stringOfWords.isEmpty()) {
                         stringOfWords.clear();
                     }
-                    stringOfWords = generator.generateTest(words.selectedLanguage);
                     if (!textFlow.getChildren().isEmpty()) {
                         textFlow.getChildren().clear();
                     }
+                    textField.clear();
+                    words.enteredWord.clear();
+                    words.currentlyEnteredWord.clear();
+                    words.indexTextFlow = 0;
                     words.clearOriginalTextFlow();
+                    words.clearEnteredTextFlow();
+                    stringOfWords = generator.generateTest(words.selectedLanguage);
                     words.populateTextFlowWithWords(stringOfWords, textFlow);
                     words.initializeOriginalChars();
                     updateTextFlow();
@@ -171,7 +180,7 @@ public class MainWindow extends Application {
     private void initializeTextBindingListener(Scene scene) {
         scene.setOnKeyPressed(event -> {
             if (isStarted) {
-                if (event.getCode() == KeyCode.TAB && event.isShiftDown() && event.isControlDown()) {
+                if (event.getCode() == KeyCode.TAB && event.isControlDown()) {
                     handleTabEnterShortcut();
                 } else if (event.getCode() == KeyCode.P && event.isShiftDown() && event.isControlDown()) {
                     handleCtrlShiftPShortcut();
@@ -207,8 +216,8 @@ public class MainWindow extends Application {
 
     //this one don't worky.....
     private void handleTabEnterShortcut() {
-        // Handle TAB + ENTER shortcut
         System.out.println("TAB + ENTER pressed");
+        startButton.fire();
     }
 
     private void handleCtrlShiftPShortcut() {
@@ -409,5 +418,9 @@ public class MainWindow extends Application {
             totalSeconds += words.secondsPerWord.get(i);
         }
         return totalSeconds;
+    }
+
+    public void restartTest(){
+
     }
 }

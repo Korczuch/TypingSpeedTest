@@ -52,7 +52,7 @@ public class Words {
     private boolean animationStarted = false;
 //    private Duration wordStartTime;
     private boolean wordInProgress;
-    private Double startTime;
+    private Double startTime = Double.valueOf(System.currentTimeMillis());
     private Double endTime;
     private Double duration;
     private boolean wordStarted = false;
@@ -426,5 +426,11 @@ public class Words {
             e.printStackTrace();
         }
     }
+
+    public void clearEnteredTextFlow(){
+        enteredTextFlow.getChildren().clear();
+    }
+
+
 
 }
