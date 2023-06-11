@@ -85,7 +85,7 @@ public class MainWindow extends Application {
         words = new Words(textFlow);
         startButton.setOnAction(actionEvent -> {
             if (languageSelection.getValue() != null && timeSelection.getValue() != null) {
-                this.selectedLanguage = languageSelection.getValue();
+                words.selectedLanguage = languageSelection.getValue();
                 int selectedTime = Integer.parseInt(timeSelection.getValue());
 
                 try {
@@ -94,7 +94,7 @@ public class MainWindow extends Application {
                     if (!stringOfWords.isEmpty()) {
                         stringOfWords.clear();
                     }
-                    stringOfWords = generator.generateTest(selectedLanguage);
+                    stringOfWords = generator.generateTest(words.selectedLanguage);
                     if (!textFlow.getChildren().isEmpty()) {
                         textFlow.getChildren().clear();
                     }
@@ -188,7 +188,11 @@ public class MainWindow extends Application {
                     char o = newValue.charAt(newValue.length() - 1);
                     //Need to finish this off
                     if (c == ' ') {
-                        words.skipWord();
+                        try {
+                            words.skipWord();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } else if (c == '\b') {
                         words.removeChar();
                     } else {

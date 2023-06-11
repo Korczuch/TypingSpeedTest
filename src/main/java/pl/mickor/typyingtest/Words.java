@@ -33,6 +33,9 @@ public class Words {
     private List<ClassifiedChar> enteredChars;
     public ArrayList<Character> currentlyEnteredWord = new ArrayList<>();
     public ArrayList<String> sourceWords = new ArrayList<>();
+    //If we generate 30 new words, we will need to have a place to save all the source words we have, for when
+    //we generate the text file
+    public ArrayList<String> allSourceWords = new ArrayList<>();
     public List<String> newSourceWords = new ArrayList<>();
     public String sourceWord = new String();
     public ArrayList<Character> enteredWord = new ArrayList<>();
@@ -55,6 +58,7 @@ public class Words {
     private boolean wordStarted = false;
     public ArrayList<Double> wordsPerMinute = new ArrayList<>();
     double averageWPM = 0;
+    String selectedLanguage;
 
     public Words(TextFlow originalTextFlow) {
         this.originalTextFlow = originalTextFlow;
@@ -136,6 +140,8 @@ public class Words {
         for (String word : words) {
             Text wordText = new Text(word + " ");
             textFlow.getChildren().add(wordText);
+            String wordToAdd = wordText.getText();
+            allSourceWords.add(wordToAdd);
         }
         sourceWords = (ArrayList<String>) words;
     }
@@ -189,7 +195,7 @@ public class Words {
         return words;
     }
 
-    public void skipWord() {
+    public void skipWord() throws IOException {
         wordStarted = false;
         endTime = Double.valueOf(System.currentTimeMillis());
         storeTimeForWord();
@@ -205,11 +211,21 @@ public class Words {
         moveToNextWord();
     }
 
-    private void moveToNextWord() {
+    private void moveToNextWord() throws IOException {
+        boolean movingToNewWords = false;
+        if(indexTextFlow >= 29){
+            movingToNewWords = true;
+        }
+        System.out.println(wordCompleted);
+        System.out.println(indexTextFlow);
+        newParagraph();
         currentlyEnteredWord.clear();
-        enteredWord.add(' ');
-        indexTextFlow++;
+        if(!movingToNewWords) {
+            enteredWord.add(' ');
+            indexTextFlow++;
+        }
         sourceWord = sourceWords.get(indexTextFlow);
+
     }
 
     Text colourCharacters(ClassifiedChar c) {
@@ -323,11 +339,26 @@ public class Words {
     //We need to generate a new string, and pass it through the methods to generate textFlow
     //We need to get language from MainWindow
     public void newParagraph() throws IOException {
-        if (indexTextFlow >= 29 && wordCompleted) {
+        if (indexTextFlow >= 29) {
             indexTextFlow = 0;
-            MainWindow mainWindow = new MainWindow();
 
-            newSourceWords = generator.generateTest(mainWindow.getLanguage());
+            newSourceWords = generator.generateTest(selectedLanguage);
+            enteredWord.clear();
+            currentlyEnteredWord.clear();
+            System.out.println("ogp"+originalTextFlow.getChildren().size());
+            System.out.println("efp"+enteredTextFlow.getChildren().size());
+            currentlyEnteredWord.clear();
+            enteredTextFlow.getChildren().clear();
+            originalTextFlow.getChildren().clear();
+            classifiedCharacters.clear();
+            System.out.println("og"+originalTextFlow.getChildren().size());
+            System.out.println("ef"+enteredTextFlow.getChildren().size());
+            populateTextFlowWithWords(newSourceWords, originalTextFlow);
+            initializeOriginalChars();
+            sourceWord = sourceWords.get(indexTextFlow);
+            indexTextFlow = 0;
+            enteredWord.clear();
+            currentlyEnteredWord.clear();
         }
     }
 
@@ -377,7 +408,7 @@ public class Words {
             FileWriter writer = new FileWriter(file);
 
             for (int i = 0; i < wordsPerMinute.size(); i++) {
-                String word = sourceWords.get(i);
+                String word = allSourceWords.get(i);
                 double wpm = wordsPerMinute.get(i);
 
                 DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
