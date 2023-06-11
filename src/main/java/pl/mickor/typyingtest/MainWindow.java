@@ -13,6 +13,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -180,7 +181,7 @@ public class MainWindow extends Application {
     private void initializeTextBindingListener(Scene scene) {
         scene.setOnKeyPressed(event -> {
             if (isStarted) {
-                if (event.getCode() == KeyCode.TAB && event.isControlDown()) {
+                if (event.getCode() == KeyCode.TAB && event.isShortcutDown()) {
                     handleTabEnterShortcut();
                 } else if (event.getCode() == KeyCode.P && event.isShiftDown() && event.isControlDown()) {
                     handleCtrlShiftPShortcut();
@@ -195,7 +196,6 @@ public class MainWindow extends Application {
                 if (!newValue.isEmpty()) {
                     char c = newValue.charAt(newValue.length() - 1);
                     char o = newValue.charAt(newValue.length() - 1);
-                    //Need to finish this off
                     if (c == ' ') {
                         try {
                             words.skipWord();
@@ -342,6 +342,9 @@ public class MainWindow extends Application {
         symbols.setDecimalSeparator('.');
         DecimalFormat decimalFormat = new DecimalFormat("#.##", symbols);
         double roundedAccuracy = Double.parseDouble(decimalFormat.format(accuracy));
+        if (Double.isNaN(roundedAccuracy)) {
+            roundedAccuracy = 0;
+        }
 
         Label correctChars = new Label("Correct Chars: " + words.correctChars);
         Label incorrectChars = new Label("Incorrect Chars: " + words.incorrectChars);
@@ -420,7 +423,4 @@ public class MainWindow extends Application {
         return totalSeconds;
     }
 
-    public void restartTest(){
-
-    }
 }

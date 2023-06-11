@@ -383,7 +383,10 @@ public class Words {
         for(Double wpm : wordsPerMinute){
             sum += wpm;
         }
-        averageWPM = sum / wordsPerMinute.size();
+        if(!wordsPerMinute.isEmpty()) {
+            averageWPM = sum / wordsPerMinute.size();
+        }else
+        {averageWPM = 0;}
     }
 
     public void clearOriginalTextFlow() {
