@@ -4,9 +4,13 @@ import javafx.animation.*;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
@@ -19,8 +23,11 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainWindow extends Application {
 
@@ -42,7 +49,6 @@ public class MainWindow extends Application {
     private boolean isStarted = false;
     private boolean isPaused = false;
     private Timeline timeline = new Timeline();
-
 
 
     @Override
@@ -165,7 +171,7 @@ public class MainWindow extends Application {
 
     private void initializeTextBindingListener(Scene scene) {
         scene.setOnKeyPressed(event -> {
-            if(isStarted) {
+            if (isStarted) {
                 if (event.getCode() == KeyCode.TAB && event.isShiftDown() && event.isControlDown()) {
                     handleTabEnterShortcut();
                 } else if (event.getCode() == KeyCode.P && event.isShiftDown() && event.isControlDown()) {
@@ -177,7 +183,7 @@ public class MainWindow extends Application {
         });
 
         textBinding.addListener((observable, oldValue, newValue) -> {
-            if(!isPaused) {
+            if (!isPaused) {
                 if (!newValue.isEmpty()) {
                     char c = newValue.charAt(newValue.length() - 1);
                     char o = newValue.charAt(newValue.length() - 1);
@@ -261,7 +267,8 @@ public class MainWindow extends Application {
                         }));
         timeline.play();
     }
-    public String getLanguage(){
+
+    public String getLanguage() {
         return selectedLanguage;
     }
 
@@ -295,6 +302,7 @@ public class MainWindow extends Application {
         // Format the RGB values as a CSS color string
         return String.format("#%02x%02x%02x", red, green, blue);
     }
+
     public static void spinLabel(Label label) {
         RotateTransition rotateTransition = new RotateTransition(Duration.seconds(5), label);
         rotateTransition.setByAngle(360); // Rotate 360 degrees
@@ -305,8 +313,10 @@ public class MainWindow extends Application {
     }
 
 
+    private void transitionToFinishScene() {
+        words.calculateWPM();
+        words.calculateAverageWPM();
 
-    private void transitionToFinishScene(){
         Stage stage = new Stage();
         BorderPane newRoot = new BorderPane();
         timeline.pause();
@@ -314,15 +324,23 @@ public class MainWindow extends Application {
         stage.setScene(newScene);
 
         int totalCharsTyped = words.correctChars + words.incorrectChars + words.extraChars + words.skippedChars;
+        double accuracy = ((double) words.correctChars / totalCharsTyped) * 100;
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        symbols.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat("#.##", symbols);
+        double roundedAccuracy = Double.parseDouble(decimalFormat.format(accuracy));
 
         Label correctChars = new Label("Correct Chars: " + words.correctChars);
         Label incorrectChars = new Label("Incorrect Chars: " + words.incorrectChars);
         Label extraChars = new Label("Extra Chars: " + words.extraChars);
-        Label missedChars = new Label("Missed Chars: " + words.skippedChars);
-        Label totalChars = new Label("Total: " +totalCharsTyped);
+        Label missedChars = new Label("Missed/Skipped Chars: " + words.skippedChars);
+        Label totalChars = new Label("Total: " + totalCharsTyped);
+        Label accuracyPercent = new Label("acc: " + roundedAccuracy + "%");
+        Label averageWPM = new Label("Average WPM: " + words.averageWPM);
 
         VBox sideBar = new VBox();
-        sideBar.getChildren().addAll(totalChars, correctChars, incorrectChars, extraChars, missedChars);
+        sideBar.getChildren().addAll(totalChars, correctChars, incorrectChars, extraChars, missedChars,
+                accuracyPercent, averageWPM);
         sideBar.setMinWidth(300);
 
         sideBar.setSpacing(10);
@@ -340,12 +358,74 @@ public class MainWindow extends Application {
         extraChars.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
         missedChars.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
         totalChars.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
+        accuracyPercent.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
+        averageWPM.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
 
         newRoot.setStyle("-fx-background-color: dimgray;");
 
         newRoot.setLeft(sideBar);
 
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Seconds");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("WPM");
+
+        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("WPM per second");
+
+        lineChart.setStyle("-fx-background-color: dimgray;");
+        lineChart.lookup(".chart-plot-background")
+                .setStyle("-fx-background-color: dimgray;");
+        lineChart.lookup(".axis")
+                .setStyle("-fx-text-fill: white;");
+        lineChart.lookup(".axis-label")
+                .setStyle("-fx-text-fill: white;");
+
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName("Word Entered");
+
+        ObservableList<XYChart.Data<Number, Number>> dataPoints = series.getData();
+        for (int i = 0; i < words.wordsPerMinute.size(); i++) {
+            double seconds = calculateTotalSeconds(i);
+            double wpm = words.wordsPerMinute.get(i);
+            dataPoints.add(new XYChart.Data<>(seconds, wpm));
+        }
+        lineChart.getData().add(series);
+
+        newRoot.setCenter(lineChart);
+
         stage.show();
     }
 
+    public void generateGraph(){
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Seconds");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("WPM");
+
+        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("WPM per second");
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName("WPM");
+
+        ObservableList<XYChart.Data<Number, Number>> dataPoints = series.getData();
+        for (int i = 0; i < words.wordsPerMinute.size(); i++) {
+            double seconds = calculateTotalSeconds(i);
+            double wpm = words.wordsPerMinute.get(i);
+            dataPoints.add(new XYChart.Data<>(seconds, wpm));
+        }
+        lineChart.getData().add(series);
+    }
+
+    private double calculateTotalSeconds(int index) {
+        double totalSeconds = 0.0;
+        for (int i = 0; i <= index; i++) {
+            totalSeconds += words.secondsPerWord.get(i);
+        }
+        return totalSeconds;
+    }
 }

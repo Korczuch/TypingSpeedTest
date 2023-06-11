@@ -13,7 +13,6 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class Words {
@@ -36,11 +35,17 @@ public class Words {
     public int skippedChars = 0;
     public int indexTextFlow = 0;
     public int indexCharacter = 0;
-    public ArrayList<Double> timePerWord = new ArrayList<>();
+    public ArrayList<Double> secondsPerWord = new ArrayList<>();
     public boolean wordCompleted = false;
     private boolean animationStarted = false;
-    private Duration wordStartTime;
+//    private Duration wordStartTime;
     private boolean wordInProgress;
+    private Double startTime;
+    private Double endTime;
+    private Double duration;
+    private boolean wordStarted = false;
+    public ArrayList<Double> wordsPerMinute = new ArrayList<>();
+    double averageWPM = 0;
 
     public Words(TextFlow originalTextFlow) {
         this.originalTextFlow = originalTextFlow;
@@ -50,41 +55,23 @@ public class Words {
 
         initializeOriginalChars();
     }
-    /*
-    Each time we type we should add the character to some sort of list, but when we press space to go to the next word
-    that character should be reset back to 0.
-    But the list that supplies textflow should keep the original list of all the added chars and be based off of that.
-    Which should be done by enteredChars but is fucking shit up idk why jfc
-
-     */
-
 
     public ClassifiedChar addChar(char c) {
         ClassifiedChar classifiedChar;
         sourceWord = sourceWords.get(indexTextFlow);
-        System.out.println(wordCompleted);
-        if (wordCompleted == false) {
-            if (indexTextFlow > 0) {
-                classifiedChar = classifiedCharacters.get(enteredWord.size());
-            } else {
-                classifiedChar = classifiedCharacters.get(enteredWord.size());
-            }
+        if (!wordStarted) {
+            startTime = Double.valueOf(System.currentTimeMillis());
+            wordStarted = true;
+        }
 
+        if (wordCompleted == false) {
+
+            classifiedChar = classifiedCharacters.get(enteredWord.size());
 
             if (c == sourceWord.charAt(currentlyEnteredWord.size())) {
                 classifiedChar.classification = CharClassification.CORRECT;
                 correctChars++;
 
-                // Check if there is a subsequent character in the word
-                //if (currentlyEnteredWord.size() + 1 < sourceWord.length()) {
-                //char nextChar = sourceWord.charAt(currentlyEnteredWord.size() + 1);
-
-                // Move to evaluating the subsequent character
-
-                //classifiedChar = classifiedCharacters.get(enteredWord.size());
-                //classifiedChar.classification = CharClassification.CORRECT;
-                //correctChars++;
-                //}
             } else if (currentlyEnteredWord.size() + 1 < sourceWord.length() && c ==
                     sourceWord.charAt(currentlyEnteredWord.size() + 1)) {
                 if (classifiedChar.classification != CharClassification.INCORRECT) {
@@ -93,14 +80,10 @@ public class Words {
                 }
                 // Move to evaluating the character we got correct
                 currentlyEnteredWord.add('$');
-                //currentlyEnteredWord.add(c);
+
                 enteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
-                //enteredWord.add(c);
-                if (indexTextFlow > 0) {
-                    classifiedChar = classifiedCharacters.get(enteredWord.size());
-                } else {
-                    classifiedChar = classifiedCharacters.get(enteredWord.size());
-                }
+                classifiedChar = classifiedCharacters.get(enteredWord.size());
+
                 classifiedChar.classification = CharClassification.CORRECT;
                 correctChars++;
             } else {
@@ -109,11 +92,8 @@ public class Words {
             }
         } else {
             classifiedChar = new ClassifiedChar(c, CharClassification.EXTRA_CHAR);
-            if (indexTextFlow > 0) {
-                classifiedCharacters.add(enteredWord.size(), classifiedChar);
-            } else {
-                classifiedCharacters.add(enteredWord.size(), classifiedChar);
-            }
+            classifiedCharacters.add(enteredWord.size(), classifiedChar);
+
 
             extraChars++;
             System.out.println(c);
@@ -122,19 +102,22 @@ public class Words {
         enteredWord.add(c);
 
         if (!wordInProgress) {
-            wordStartTime = Duration.ZERO;
+//            wordStartTime = Duration.ZERO;
             wordInProgress = true;
         }
 
         updateEnteredText();
         checkWordCompleted();
-        System.out.println("Source word " + sourceWord.length());
-        System.out.println("current word: " + currentlyEnteredWord.size());
-        System.out.println("skipped" + skippedChars);
-        System.out.println("incorrect " + incorrectChars);
-        System.out.println("correct " + correctChars);
-        System.out.println("currently entered word: " + currentlyEnteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
-        System.out.println("entered word: " + enteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
+//        System.out.println("Source word " + sourceWord.length());
+//        System.out.println("current word: " + currentlyEnteredWord.size());
+//        System.out.println("skipped" + skippedChars);
+//        System.out.println("incorrect " + incorrectChars);
+//        System.out.println("correct " + correctChars);
+//        System.out.println("currently entered word: " + currentlyEnteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
+//        System.out.println("entered word: " + enteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
+//        System.out.println(wordStarted);
+//        System.out.println(startTime);
+//        System.out.println(endTime);
         return classifiedChar;
     }
 
@@ -198,35 +181,17 @@ public class Words {
     }
 
     public void skipWord() {
+        wordStarted = false;
+        endTime = Double.valueOf(System.currentTimeMillis());
+        storeTimeForWord();
 
         int size = enteredWord.size();
-        for(int i = 0; i < sourceWord.length() - currentlyEnteredWord.size(); i++){
+        for (int i = 0; i < sourceWord.length() - currentlyEnteredWord.size(); i++) {
             classifiedCharacters.get(size + i).classification = CharClassification.SKIPPED_CHAR;
             enteredWord.add('$');
             skippedChars++;
         }
 
-
-//        for (ClassifiedChar classifiedChar : classifiedCharacters) {
-//            if (wordCompleted && classifiedChar.classification == CharClassification.MISSING_CHAR) {
-//                classifiedChar.classification = CharClassification.SKIPPED_CHAR;
-//                skippedChars++;
-//                //need to add the skipped characters here to entered word...
-//                //enteredWord.add('a');
-//
-//            }
-//
-//            if (classifiedChar.character == ' ') {
-//                wordCompleted = false;
-//            }
-//        }
-
-
-//        wordInProgress = false;
-//        if(skippingWord) {
-//            enteredWord.add('$');
-//
-//        }
         wordCompleted = false;
         moveToNextWord();
     }
@@ -234,16 +199,6 @@ public class Words {
     private void moveToNextWord() {
         currentlyEnteredWord.clear();
         enteredWord.add(' ');
-        //if (originalChars.size() > classifiedCharacters.size()) {
-        int nextWordStartIndex = classifiedCharacters.size();
-        //for (int i = nextWordStartIndex; i < originalChars.size(); i++) {
-        //ClassifiedChar classifiedChar = originalChars.get(i);
-        //classifiedCharacters.add(classifiedChar);
-        //this shit ain't working, and the character aren't getting added
-        //probbably because classifiedChar isn't a ring? fuck me if I know?
-        //enteredWord.add(classifiedChar.getCharacter());
-        // }
-        // }
         indexTextFlow++;
     }
 
@@ -278,7 +233,7 @@ public class Words {
             enteredTextFlow.getChildren().add(text);
         }
         if (wordCompleted && wordInProgress) {
-            timePerWord.add(wordStartTime.toSeconds());
+//            secondsPerWord.add(wordStartTime.toSeconds());
             wordInProgress = false;
         }
         waveAnimation(enteredTextFlow);
@@ -350,7 +305,7 @@ public class Words {
             wordCompleted = false;
         } else {
             wordCompleted = true;
-            wordStartTime = Duration.ZERO;
+//            wordStartTime = Duration.ZERO;
         }
     }
 
@@ -366,6 +321,30 @@ public class Words {
 
 
         }
+    }
+
+    private void storeTimeForWord(){
+        double timeForWord = endTime - startTime;
+        double secondsForWord = timeForWord/1000;
+        secondsPerWord.add(secondsForWord);
+        System.out.println(timeForWord);
+        System.out.println(secondsForWord);
+    }
+
+    public void calculateWPM() {
+        for(int i = 0; i < secondsPerWord.size(); i++){
+            double WPM;
+            WPM = 60/secondsPerWord.get(i);
+            wordsPerMinute.add(WPM);
+        }
+    }
+
+    public void calculateAverageWPM(){
+        long sum = 0;
+        for(Double wpm : wordsPerMinute){
+            sum += wpm;
+        }
+        averageWPM = sum / wordsPerMinute.size();
     }
 /*
 WPM calculations...
