@@ -181,7 +181,7 @@ public class MainWindow extends Application {
     private void initializeTextBindingListener(Scene scene) {
         scene.setOnKeyPressed(event -> {
             if (isStarted) {
-                if (event.getCode() == KeyCode.TAB && event.isShortcutDown()) {
+                if (event.getCode() == KeyCode.R && event.isControlDown()) {
                     handleTabEnterShortcut();
                 } else if (event.getCode() == KeyCode.P && event.isShiftDown() && event.isControlDown()) {
                     handleCtrlShiftPShortcut();
