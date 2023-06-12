@@ -279,6 +279,7 @@ public class Words {
         return originalTextFlow;
     }
 
+
     public void removeChar() {
         if (!enteredWord.isEmpty() && !currentlyEnteredWord.isEmpty()) {
             int lastEnteredIndex = currentlyEnteredWord.size() - 1;
@@ -289,14 +290,24 @@ public class Words {
             currentlyEnteredWord.remove(lastEnteredIndex);
             for (int i = lastEnteredCharIndex; i >= 0; i--) {
                 ClassifiedChar classifiedChar = classifiedCharacters.get(i);
+                if(classifiedChar.classification == CharClassification.INCORRECT){
+                    incorrectChars--;
+                }
+                if(classifiedChar.classification == CharClassification.SKIPPED_CHAR){
+                    skippedChars--;
+                }
+                if(classifiedChar.classification == CharClassification.CORRECT){
+                    correctChars--;
+                }
+                if(classifiedChar.classification == CharClassification.EXTRA_CHAR){
+                    extraChars--;
+                    classifiedCharacters.remove(i);
+                }
                 if (classifiedChar.classification != CharClassification.MISSING_CHAR) {
                     classifiedChar.classification = CharClassification.MISSING_CHAR;
-//                    if(enteredWord.get(lastEnteredCharIndex-1) == '$'){
-//                        if (classifiedChar.classification != CharClassification.MISSING_CHAR) {
-//                            classifiedChar.classification = CharClassification.MISSING_CHAR;}
-//                    }
                     break;
                 }
+
             }
 
 //            if(enteredWord.get(lastEnteredCharIndex-1) == '$'){
@@ -304,6 +315,7 @@ public class Words {
 //                currentlyEnteredWord.remove(lastEnteredIndex-1);
 //            }
         }
+        wordCompleted = false;
     }
 
     //if no more characters return false
