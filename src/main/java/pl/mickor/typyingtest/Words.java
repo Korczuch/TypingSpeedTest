@@ -280,23 +280,29 @@ public class Words {
     }
 
     public void removeChar() {
-        if (!enteredWord.isEmpty()) {
+        if (!enteredWord.isEmpty() && !currentlyEnteredWord.isEmpty()) {
             int lastEnteredIndex = currentlyEnteredWord.size() - 1;
             int lastEnteredCharIndex = enteredWord.size() - 1;
-            char lastEnteredChar = enteredWord.get(lastEnteredCharIndex);
+            System.out.println("Removed");
 
-            // Find the last character with a classification and mark it as missing
-            for (int i = lastEnteredIndex; i >= 0; i--) {
+            enteredWord.remove(lastEnteredCharIndex);
+            currentlyEnteredWord.remove(lastEnteredIndex);
+            for (int i = lastEnteredCharIndex; i >= 0; i--) {
                 ClassifiedChar classifiedChar = classifiedCharacters.get(i);
                 if (classifiedChar.classification != CharClassification.MISSING_CHAR) {
                     classifiedChar.classification = CharClassification.MISSING_CHAR;
+//                    if(enteredWord.get(lastEnteredCharIndex-1) == '$'){
+//                        if (classifiedChar.classification != CharClassification.MISSING_CHAR) {
+//                            classifiedChar.classification = CharClassification.MISSING_CHAR;}
+//                    }
                     break;
                 }
             }
 
-            classifiedCharacters.remove(classifiedCharacters.size() - 1);
-            currentlyEnteredWord.remove(lastEnteredIndex);
-            enteredWord.remove(lastEnteredCharIndex);
+//            if(enteredWord.get(lastEnteredCharIndex-1) == '$'){
+//                enteredWord.remove(lastEnteredCharIndex-1);
+//                currentlyEnteredWord.remove(lastEnteredIndex-1);
+//            }
         }
     }
 

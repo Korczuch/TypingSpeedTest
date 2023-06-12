@@ -51,6 +51,8 @@ public class MainWindow extends Application {
     private boolean isPaused = false;
     private Timeline timeline = new Timeline();
     private Button startButton = new Button("Generate test");
+    Scene scene;
+    private boolean isBackSpacePressed = false;
 
 
     @Override
@@ -165,7 +167,7 @@ public class MainWindow extends Application {
 
         textBinding = Bindings.createStringBinding(() -> textField.getText(), textField.textProperty());
 
-        Scene scene = new Scene(root, 1400, 600);
+        scene = new Scene(root, 1400, 600);
         stage.setTitle("S26625 typing test");
         stage.setScene(scene);
         stage.show();
@@ -179,6 +181,25 @@ public class MainWindow extends Application {
     //words.removeChar()
 
     private void initializeTextBindingListener(Scene scene) {
+        TextField textField = (TextField) scene.getRoot().lookup(".text-field");
+
+        // Register an event filter on the TextField to intercept backspace key press event
+        textField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.BACK_SPACE) {
+                event.consume(); // Consume the event to prevent TextField from handling it
+                words.removeChar();
+                updateTextFlow();
+                words.updateEnteredText();
+                isBackSpacePressed = true;
+            }
+        });
+
+        textField.addEventFilter(KeyEvent.KEY_RELEASED, event -> {
+            if (event.getCode() == KeyCode.BACK_SPACE) {
+                isBackSpacePressed = false; // Reset the flag when the backspace key is released
+            }
+        });
+
         scene.setOnKeyPressed(event -> {
             if (isStarted) {
                 if (event.getCode() == KeyCode.R && event.isControlDown()) {
@@ -195,23 +216,25 @@ public class MainWindow extends Application {
             if (!isPaused) {
                 if (!newValue.isEmpty()) {
                     char c = newValue.charAt(newValue.length() - 1);
-                    char o = newValue.charAt(newValue.length() - 1);
-                    if (c == ' ') {
-                        try {
-                            words.skipWord();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    if (!isBackSpacePressed) {
+                        if (c == ' ') {
+                            try {
+                                words.skipWord();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else if (c == '\b') {
+                            words.removeChar();
+                        } else {
+                            words.addChar(c);
                         }
-                    } else if (c == '\b') {
-                        words.removeChar();
-                    } else {
-                        words.addChar(c);
+                        updateTextFlow();
+                        words.updateEnteredText();
                     }
-                    updateTextFlow();
-                    words.updateEnteredText();
                 }
             }
         });
+        isBackSpacePressed = false;
     }
 
     //this one don't worky.....
@@ -330,10 +353,12 @@ public class MainWindow extends Application {
         words.calculateAverageWPM();
         words.generateWordFile();
 
-        Stage stage = new Stage();
+        double prevW = startButton.getScene().getWindow().getWidth();
+        double prevH = startButton.getScene().getWindow().getHeight();
+        Stage stage = (Stage) startButton.getScene().getWindow();
         BorderPane newRoot = new BorderPane();
         timeline.pause();
-        Scene newScene = new Scene(newRoot, 800, 600);
+        Scene newScene = new Scene(newRoot, prevW, prevH);
         stage.setScene(newScene);
 
         int totalCharsTyped = words.correctChars + words.incorrectChars + words.extraChars + words.skippedChars;
@@ -353,10 +378,19 @@ public class MainWindow extends Application {
         Label totalChars = new Label("Total: " + totalCharsTyped);
         Label accuracyPercent = new Label("acc: " + roundedAccuracy + "%");
         Label averageWPM = new Label("Average WPM: " + words.averageWPM);
+        Button restartTest = new Button("Restart Test");
 
         VBox sideBar = new VBox();
         sideBar.getChildren().addAll(totalChars, correctChars, incorrectChars, extraChars, missedChars,
-                accuracyPercent, averageWPM);
+                accuracyPercent, averageWPM, restartTest);
+
+        restartTest.setOnAction(actionEvent -> {
+            words.secondsPerWord.clear();
+            words.wordsPerMinute.clear();
+            stage.setScene(scene);
+            startButton.fire();
+                });
+
         sideBar.setMinWidth(300);
 
         sideBar.setSpacing(10);
