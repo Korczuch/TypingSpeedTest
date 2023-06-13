@@ -21,10 +21,6 @@ public class TestGenerator {
         return randomWords;
    }
 
-
-//method to select the correction dictionary
-
-    //method to select 30 random words and save them as textflow
     private List<String> getRandomWords(String filePath, int wordCount) throws IOException {
         List<String> words = Files.readAllLines(Path.of(filePath));
         List<String> randomWords = new ArrayList<>();

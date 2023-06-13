@@ -15,9 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +31,6 @@ public class Words {
     private List<ClassifiedChar> enteredChars;
     public ArrayList<Character> currentlyEnteredWord = new ArrayList<>();
     public ArrayList<String> sourceWords = new ArrayList<>();
-    //If we generate 30 new words, we will need to have a place to save all the source words we have, for when
-    //we generate the text file
     public ArrayList<String> allSourceWords = new ArrayList<>();
     public List<String> newSourceWords = new ArrayList<>();
     public String sourceWord = new String();
@@ -49,12 +45,9 @@ public class Words {
     public int indexCharacter = 0;
     public ArrayList<Double> secondsPerWord = new ArrayList<>();
     public boolean wordCompleted = false;
-    private boolean animationStarted = false;
-//    private Duration wordStartTime;
     private boolean wordInProgress;
     private Double startTime = Double.valueOf(System.currentTimeMillis());
     private Double endTime;
-    private Double duration;
     private boolean wordStarted = false;
     public ArrayList<Double> wordsPerMinute = new ArrayList<>();
     double averageWPM = 0;
@@ -91,7 +84,6 @@ public class Words {
                     classifiedChar.classification = CharClassification.SKIPPED_CHAR;
                     skippedChars++;
                 }
-                // Move to evaluating the character we got correct
                 currentlyEnteredWord.add('$');
 
                 enteredWord.add(sourceWord.charAt(currentlyEnteredWord.size()));
@@ -106,31 +98,17 @@ public class Words {
         } else {
             classifiedChar = new ClassifiedChar(c, CharClassification.EXTRA_CHAR);
             classifiedCharacters.add(enteredWord.size(), classifiedChar);
-
-
             extraChars++;
-            System.out.println(c);
         }
         currentlyEnteredWord.add(c);
         enteredWord.add(c);
 
         if (!wordInProgress) {
-//            wordStartTime = Duration.ZERO;
             wordInProgress = true;
         }
 
         updateEnteredText();
         checkWordCompleted();
-//        System.out.println("Source word " + sourceWord.length());
-//        System.out.println("current word: " + currentlyEnteredWord.size());
-//        System.out.println("skipped" + skippedChars);
-//        System.out.println("incorrect " + incorrectChars);
-//        System.out.println("correct " + correctChars);
-//        System.out.println("currently entered word: " + currentlyEnteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
-//        System.out.println("entered word: " + enteredWord.stream().map(x -> x.toString()).collect(Collectors.joining()));
-//        System.out.println(wordStarted);
-//        System.out.println(startTime);
-//        System.out.println(endTime);
         return classifiedChar;
     }
 
@@ -199,7 +177,6 @@ public class Words {
         wordStarted = false;
         endTime = Double.valueOf(System.currentTimeMillis());
         storeTimeForWord();
-        System.out.println(sourceWord);
         int size = enteredWord.size();
         for (int i = 0; i < sourceWord.length() - currentlyEnteredWord.size(); i++) {
             classifiedCharacters.get(size + i).classification = CharClassification.SKIPPED_CHAR;
@@ -213,14 +190,12 @@ public class Words {
 
     private void moveToNextWord() throws IOException {
         boolean movingToNewWords = false;
-        if(indexTextFlow >= 29){
+        if (indexTextFlow >= 29) {
             movingToNewWords = true;
         }
-        System.out.println(wordCompleted);
-        System.out.println(indexTextFlow);
         newParagraph();
         currentlyEnteredWord.clear();
-        if(!movingToNewWords) {
+        if (!movingToNewWords) {
             enteredWord.add(' ');
             indexTextFlow++;
         }
@@ -284,22 +259,21 @@ public class Words {
         if (!enteredWord.isEmpty() && !currentlyEnteredWord.isEmpty()) {
             int lastEnteredIndex = currentlyEnteredWord.size() - 1;
             int lastEnteredCharIndex = enteredWord.size() - 1;
-            System.out.println("Removed");
 
             enteredWord.remove(lastEnteredCharIndex);
             currentlyEnteredWord.remove(lastEnteredIndex);
             for (int i = lastEnteredCharIndex; i >= 0; i--) {
                 ClassifiedChar classifiedChar = classifiedCharacters.get(i);
-                if(classifiedChar.classification == CharClassification.INCORRECT){
+                if (classifiedChar.classification == CharClassification.INCORRECT) {
                     incorrectChars--;
                 }
-                if(classifiedChar.classification == CharClassification.SKIPPED_CHAR){
+                if (classifiedChar.classification == CharClassification.SKIPPED_CHAR) {
                     skippedChars--;
                 }
-                if(classifiedChar.classification == CharClassification.CORRECT){
+                if (classifiedChar.classification == CharClassification.CORRECT) {
                     correctChars--;
                 }
-                if(classifiedChar.classification == CharClassification.EXTRA_CHAR){
+                if (classifiedChar.classification == CharClassification.EXTRA_CHAR) {
                     extraChars--;
                     classifiedCharacters.remove(i);
                 }
@@ -310,10 +284,7 @@ public class Words {
 
             }
 
-//            if(enteredWord.get(lastEnteredCharIndex-1) == '$'){
-//                enteredWord.remove(lastEnteredCharIndex-1);
-//                currentlyEnteredWord.remove(lastEnteredIndex-1);
-//            }
+
         }
         wordCompleted = false;
     }
@@ -353,9 +324,7 @@ public class Words {
         }
     }
 
-    //generate a new string of 30 words, and set them as the textFlow (same thing that's done at the start...)
-    //We need to generate a new string, and pass it through the methods to generate textFlow
-    //We need to get language from MainWindow
+
     public void newParagraph() throws IOException {
         if (indexTextFlow >= 29) {
             indexTextFlow = 0;
@@ -363,14 +332,10 @@ public class Words {
             newSourceWords = generator.generateTest(selectedLanguage);
             enteredWord.clear();
             currentlyEnteredWord.clear();
-            System.out.println("ogp"+originalTextFlow.getChildren().size());
-            System.out.println("efp"+enteredTextFlow.getChildren().size());
             currentlyEnteredWord.clear();
             enteredTextFlow.getChildren().clear();
             originalTextFlow.getChildren().clear();
             classifiedCharacters.clear();
-            System.out.println("og"+originalTextFlow.getChildren().size());
-            System.out.println("ef"+enteredTextFlow.getChildren().size());
             populateTextFlowWithWords(newSourceWords, originalTextFlow);
             initializeOriginalChars();
             sourceWord = sourceWords.get(indexTextFlow);
@@ -380,38 +345,37 @@ public class Words {
         }
     }
 
-    private void storeTimeForWord(){
+    private void storeTimeForWord() {
         double timeForWord = endTime - startTime;
-        double secondsForWord = timeForWord/1000;
+        double secondsForWord = timeForWord / 1000;
         secondsPerWord.add(secondsForWord);
-        System.out.println(timeForWord);
-        System.out.println(secondsForWord);
     }
 
     public void calculateWPM() {
-        for(int i = 0; i < secondsPerWord.size(); i++){
+        for (int i = 0; i < secondsPerWord.size(); i++) {
             double WPM;
-            WPM = 60/secondsPerWord.get(i);
+            WPM = 60 / secondsPerWord.get(i);
             wordsPerMinute.add(WPM);
         }
     }
 
-    public void calculateAverageWPM(){
+    public void calculateAverageWPM() {
         long sum = 0;
-        for(Double wpm : wordsPerMinute){
+        for (Double wpm : wordsPerMinute) {
             sum += wpm;
         }
-        if(!wordsPerMinute.isEmpty()) {
+        if (!wordsPerMinute.isEmpty()) {
             averageWPM = sum / wordsPerMinute.size();
-        }else
-        {averageWPM = 0;}
+        } else {
+            averageWPM = 0;
+        }
     }
 
     public void clearOriginalTextFlow() {
         originalTextFlow.getChildren().clear();
     }
 
-    //Generate a word file with the entered words
+
     public void generateWordFile() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss");
@@ -448,10 +412,9 @@ public class Words {
         }
     }
 
-    public void clearEnteredTextFlow(){
+    public void clearEnteredTextFlow() {
         enteredTextFlow.getChildren().clear();
     }
-
 
 
 }
