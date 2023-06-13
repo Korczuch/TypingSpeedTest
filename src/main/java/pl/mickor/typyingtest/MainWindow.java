@@ -291,26 +291,31 @@ public class MainWindow extends Application {
     }
 
     private void startTimer(int selectedTime) {
+        // Stop the previous timeline if it is already running
+        timeline.stop();
+
         remainingTime = selectedTime;
         timeLeftLabel.setText(String.valueOf(remainingTime));
+
         timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.getKeyFrames().clear(); // Clear the previous key frames
+
+        // Add a new key frame to update the time left every second
         timeline.getKeyFrames().add(
-                new KeyFrame(Duration.seconds(1),
-                        new EventHandler<ActionEvent>() {
-                            public void handle(ActionEvent event) {
-                                remainingTime--;
-                                timeLeftLabel.setText(String.valueOf(remainingTime));
-                                if (remainingTime <= 0) {
-                                    timeline.stop();
-                                    transitionToFinishScene();
-                                }
-                                if (remainingTime <= 5) {
-                                    timeLeftLabel.setTextFill(Color.RED);
-                                } else {
-                                    timeLeftLabel.setTextFill(Color.ORANGE);
-                                }
-                            }
-                        }));
+                new KeyFrame(Duration.seconds(1), event -> {
+                    remainingTime--;
+                    timeLeftLabel.setText(String.valueOf(remainingTime));
+                    if (remainingTime <= 0) {
+                        timeline.stop();
+                        transitionToFinishScene();
+                    }
+                    if (remainingTime <= 5) {
+                        timeLeftLabel.setTextFill(Color.RED);
+                    } else {
+                        timeLeftLabel.setTextFill(Color.ORANGE);
+                    }
+                }));
+
         timeline.play();
     }
 
