@@ -46,7 +46,6 @@ public class MainWindow extends Application {
     private Label timeLeftLabel;
     private int remainingTime;
     public static List<String> stringOfWords = new ArrayList<>();
-    private String selectedLanguage;
     private boolean isStarted = false;
     private boolean isPaused = false;
     private Timeline timeline = new Timeline();
@@ -76,13 +75,9 @@ public class MainWindow extends Application {
         timeSelection.getItems().addAll("15", "20", "45", "60", "90", "120", "300");
         timeSelection.setPromptText("Select time for test");
 
-        //Button startButton = new Button("Generate test");
-        //textFlow = new TextFlow();
+        Button endTestButton = new Button("End test");
 
-        //this part is gonna get deleted later
-        Button testButton = new Button("End test");
-
-        testButton.setOnAction(actionEvent -> {
+        endTestButton.setOnAction(actionEvent -> {
             transitionToFinishScene();
         });
 
@@ -93,7 +88,6 @@ public class MainWindow extends Application {
                 int selectedTime = Integer.parseInt(timeSelection.getValue());
 
                 try {
-                    //Why the fuck when I press again this bitch adds not clears the hoe ffs
                     textFlow.getChildren().clear();
                     if(!words.classifiedCharacters.isEmpty()){
                         words.classifiedCharacters.clear();
@@ -135,13 +129,14 @@ public class MainWindow extends Application {
         });
 
         VBox sideBar = new VBox();
-        sideBar.getChildren().addAll(language, languageSelection, time, timeSelection, averageWPM, timeLeft, timeLeftLabel, startButton, testButton);
+        sideBar.getChildren().addAll(language, languageSelection, time, timeSelection, averageWPM, timeLeft,
+                timeLeftLabel, startButton, endTestButton);
         sideBar.setMinWidth(300);
 
         sideBar.setSpacing(10);
 
         sideBar.prefWidthProperty().bind(Bindings.createDoubleBinding(
-                () -> Math.max(sideBar.getMinWidth(), root.getWidth() * 0.2), // Adjust the multiplier as needed
+                () -> Math.max(sideBar.getMinWidth(), root.getWidth() * 0.2),
                 root.widthProperty()
         ));
 
@@ -175,18 +170,13 @@ public class MainWindow extends Application {
         initializeTextBindingListener(scene);
     }
 
-    //Another idea for removing characters, to avoid the last char after pressing backspace being considered a new
-    //char, is to make it so that each time we press a character, we clear the textbinding so that it doesn't know the
-    //previous characters, and with that, have a seperate method that when backspace is pressed, we call
-    //words.removeChar()
-
     private void initializeTextBindingListener(Scene scene) {
         TextField textField = (TextField) scene.getRoot().lookup(".text-field");
 
-        // Register an event filter on the TextField to intercept backspace key press event
+
         textField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.BACK_SPACE) {
-                event.consume(); // Consume the event to prevent TextField from handling it
+                event.consume();
                 words.removeChar();
                 updateTextFlow();
                 words.updateEnteredText();
@@ -196,7 +186,7 @@ public class MainWindow extends Application {
 
         textField.addEventFilter(KeyEvent.KEY_RELEASED, event -> {
             if (event.getCode() == KeyCode.BACK_SPACE) {
-                isBackSpacePressed = false; // Reset the flag when the backspace key is released
+                isBackSpacePressed = false;
             }
         });
 
@@ -237,14 +227,11 @@ public class MainWindow extends Application {
         isBackSpacePressed = false;
     }
 
-    //this one don't worky.....
     private void handleTabEnterShortcut() {
-        System.out.println("TAB + ENTER pressed");
         startButton.fire();
     }
 
     private void handleCtrlShiftPShortcut() {
-        // Handle CTRL + SHIFT + P shortcut
         if (!isPaused) {
             isPaused = true;
             timeline.pause();
@@ -255,7 +242,6 @@ public class MainWindow extends Application {
     }
 
     private void handleEscapeShortcut() {
-        System.out.println("ESC pressed");
         transitionToFinishScene();
     }
 
@@ -301,10 +287,6 @@ public class MainWindow extends Application {
                             }
                         }));
         timeline.play();
-    }
-
-    public String getLanguage() {
-        return selectedLanguage;
     }
 
     private void animateLabelColors(Label label) {
@@ -420,6 +402,7 @@ public class MainWindow extends Application {
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("WPM");
+
 
         LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setTitle("WPM per second");
