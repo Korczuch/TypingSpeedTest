@@ -10,6 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="Images" target="17" />
       <module name="TypyingTest" target="17" />
     </bytecodeTargetLevel>
   </component>

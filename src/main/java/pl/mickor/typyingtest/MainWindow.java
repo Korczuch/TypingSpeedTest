@@ -12,9 +12,12 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -59,6 +62,8 @@ public class MainWindow extends Application {
 
         TextField textField = new TextField();
         BorderPane root = new BorderPane();
+        BorderPane nootNoot = new BorderPane();
+        nootNoot.setCenter(root);
 
         Label language = new Label("Language:");
         Label time = new Label("Time (in seconds):");
@@ -159,10 +164,30 @@ public class MainWindow extends Application {
 
         textField.setOpacity(50);
         root.setBottom(textField);
+        Label cttlRLabel = new Label("Restart:");
+        Label pauseLabel = new Label("Pause:");
+        Label endLabel = new Label("End test:");
+        cttlRLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
+        pauseLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
+        endLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: orange;");
+
+
+          ImageView ctrlRImage = new ImageView(new Image("file:Images/kbs_ctrl_r.png"));
+          ImageView ctrlShiftPImage = new ImageView(new Image("file:Images/kbs_ctrl_shift_p.png"));
+          ImageView espaceImage = new ImageView(new Image("file:Images/kbs_escape.png"));
+
+
+        HBox footer = new HBox();
+        footer.setStyle("-fx-background-color: lightslategray;");
+        footer.getChildren().addAll(cttlRLabel,ctrlRImage,pauseLabel ,ctrlShiftPImage, endLabel,espaceImage);
+
+
+        nootNoot.setBottom(footer);
+
 
         textBinding = Bindings.createStringBinding(() -> textField.getText(), textField.textProperty());
 
-        scene = new Scene(root, 1400, 600);
+        scene = new Scene(nootNoot, 1400, 600);
         stage.setTitle("S26625 typing test");
         stage.setScene(scene);
         stage.show();
