@@ -234,7 +234,6 @@ public class Words {
             enteredTextFlow.getChildren().add(text);
         }
         if (wordCompleted && wordInProgress) {
-//            secondsPerWord.add(wordStartTime.toSeconds());
             wordInProgress = false;
         }
         waveAnimation(enteredTextFlow);
@@ -320,7 +319,6 @@ public class Words {
             wordCompleted = false;
         } else {
             wordCompleted = true;
-//            wordStartTime = Duration.ZERO;
         }
     }
 

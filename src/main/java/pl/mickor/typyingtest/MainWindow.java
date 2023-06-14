@@ -5,8 +5,6 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -36,8 +34,6 @@ import java.util.Locale;
 public class MainWindow extends Application {
 
     private Words words;
-
-    private SequentialTransition waveAnimation;
 
     TestGenerator generator = new TestGenerator();
 
@@ -291,16 +287,14 @@ public class MainWindow extends Application {
     }
 
     private void startTimer(int selectedTime) {
-        // Stop the previous timeline if it is already running
         timeline.stop();
 
         remainingTime = selectedTime;
         timeLeftLabel.setText(String.valueOf(remainingTime));
 
         timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.getKeyFrames().clear(); // Clear the previous key frames
+        timeline.getKeyFrames().clear();
 
-        // Add a new key frame to update the time left every second
         timeline.getKeyFrames().add(
                 new KeyFrame(Duration.seconds(1), event -> {
                     remainingTime--;
@@ -320,41 +314,34 @@ public class MainWindow extends Application {
     }
 
     private void animateLabelColors(Label label) {
-        // Create a timeline with a duration of 10 seconds
         Timeline timeline = new Timeline();
 
-        // Generate a new random color every 1 second
         for (int i = 0; i < 10; i++) {
             KeyFrame keyFrame = new KeyFrame(Duration.seconds(i + 0.5),
                     event -> label.setTextFill(Color.web(getRandomColor())));
             timeline.getKeyFrames().add(keyFrame);
         }
 
-        // Set the cycle count to 1 to play the animation only once
         timeline.setCycleCount(1);
 
-        // When the animation finishes, reset the label's color
         timeline.setOnFinished(event -> label.setTextFill(Color.ORANGE));
 
-        // Start the animation
         timeline.play();
     }
 
     private String getRandomColor() {
-        // Generate random RGB values
         int red = (int) (Math.random() * 256);
         int green = (int) (Math.random() * 256);
         int blue = (int) (Math.random() * 256);
 
-        // Format the RGB values as a CSS color string
         return String.format("#%02x%02x%02x", red, green, blue);
     }
 
     public static void spinLabel(Label label) {
         RotateTransition rotateTransition = new RotateTransition(Duration.seconds(5), label);
-        rotateTransition.setByAngle(360); // Rotate 360 degrees
-        rotateTransition.setCycleCount(1); // Perform one full rotation
-        rotateTransition.setAutoReverse(false); // Do not reverse the animation
+        rotateTransition.setByAngle(360);
+        rotateTransition.setCycleCount(1);
+        rotateTransition.setAutoReverse(false);
 
         rotateTransition.play();
     }
