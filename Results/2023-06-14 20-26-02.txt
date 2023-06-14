@@ -1,0 +1,11 @@
+allocator  --> 41.87wpm
+uncatastrophic  --> 13.89wpm
+nonendurance  --> 33.65wpm
+brighteyes  --> 16.3wpm
+dentilabial  --> 19.13wpm
+mandorla  --> 26.64wpm
+tambourin  --> 20.8wpm
+wipe  --> 35.71wpm
+imparter  --> 14.48wpm
+nabby  --> 11.78wpm
+manetti  --> 10.84wpm
