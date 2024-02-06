@@ -1,0 +1,2 @@
+# Typing Speed Test
+Simple Java application with a functional GUI to check the user's typing speed in multiple different languages. Typing test actively displays the currently typed character and displays the corectness of typed words and characters. After the desired time limit ends, the application displays a detailed analysis of performance throughout the test and saves the result to a text file.
